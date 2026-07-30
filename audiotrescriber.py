@@ -387,6 +387,32 @@ section[data-testid="stSidebar"] [data-baseweb="select"] > div{{
     font-weight:500;
 }}
 
+/* ---------- Instant pop-in for "ready" panels & results ---------- */
+/* fires the moment Streamlit renders the block, so the reveal itself feels
+   immediate even while the mic component is still handing off audio data */
+
+[class*="st-key-record_ready_block"],
+[class*="st-key-upload_ready_block"],
+[class*="st-key-result_block_"]{{
+    animation: popIn .32s cubic-bezier(.22,1,.36,1) both;
+}}
+
+@keyframes popIn{{
+    0%{{ opacity:0; transform:translateY(10px) scale(.97); }}
+    60%{{ opacity:1; transform:translateY(-1px) scale(1.005); }}
+    100%{{ opacity:1; transform:translateY(0) scale(1); }}
+}}
+
+.pill-pop{{
+    animation: pillPop .4s cubic-bezier(.34,1.56,.64,1) both;
+}}
+
+@keyframes pillPop{{
+    0%{{ opacity:0; transform:scale(.6); }}
+    70%{{ opacity:1; transform:scale(1.08); }}
+    100%{{ opacity:1; transform:scale(1); }}
+}}
+
 /* ---------- Live waveform (ambient listening indicator) ---------- */
 
 .waveform{{
@@ -557,35 +583,37 @@ def copy_to_clipboard_button(text: str, key: str):
 
 def render_result(result: dict, source_label: str):
     st.toast("Transcription complete", icon="✨")
-    st.success(f"✅ Transcribed successfully from {source_label}")
-
-    text = result.get("text", "").strip()
-    detected_lang = (result.get("language") or "—").upper()
-    word_count = len(text.split()) if text else 0
-
-    st.markdown(f"""
-    <div class="stat-strip">
-        <div class="stat-box"><div class="num">{word_count}</div><div class="lbl">Words</div></div>
-        <div class="stat-box"><div class="num">{detected_lang}</div><div class="lbl">Detected Language</div></div>
-        <div class="stat-box"><div class="num">{time.strftime('%H:%M')}</div><div class="lbl">Transcribed At</div></div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.write("")
     result_key = f"{source_label}_{int(time.time())}"
-    st.text_area("📝 Recognized Speech", value=text, height=240, key=f"txt_{result_key}")
 
-    col1, col2 = st.columns(2)
-    with col1:
-        st.download_button(
-            label="⬇️ Download (.txt)",
-            data=text,
-            file_name=f"transcript_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
-            mime="text/plain",
-            use_container_width=True,
-        )
-    with col2:
-        copy_to_clipboard_button(text, key=result_key)
+    with st.container(key=f"result_block_{result_key}"):
+        st.success(f"✅ Transcribed successfully from {source_label}")
+
+        text = result.get("text", "").strip()
+        detected_lang = (result.get("language") or "—").upper()
+        word_count = len(text.split()) if text else 0
+
+        st.markdown(f"""
+        <div class="stat-strip">
+            <div class="stat-box"><div class="num">{word_count}</div><div class="lbl">Words</div></div>
+            <div class="stat-box"><div class="num">{detected_lang}</div><div class="lbl">Detected Language</div></div>
+            <div class="stat-box"><div class="num">{time.strftime('%H:%M')}</div><div class="lbl">Transcribed At</div></div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.write("")
+        st.text_area("📝 Recognized Speech", value=text, height=240, key=f"txt_{result_key}")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.download_button(
+                label="⬇️ Download (.txt)",
+                data=text,
+                file_name=f"transcript_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                mime="text/plain",
+                use_container_width=True,
+            )
+        with col2:
+            copy_to_clipboard_button(text, key=result_key)
 
 
 # =====================================================================
@@ -620,8 +648,9 @@ with tab_record:
     )
 
     if audio:
-        st.markdown("<span class='pill'>🎧 Recording ready</span>", unsafe_allow_html=True)
-        st.audio(audio["bytes"])
+        with st.container(key="record_ready_block"):
+            st.markdown("<span class='pill pill-pop'>🎧 Recording ready</span>", unsafe_allow_html=True)
+            st.audio(audio["bytes"])
 
         if st.button("📨 Transcribe Recording", key="btn_record_send"):
             with st.spinner("💎 Crystal AI is listening..."):
@@ -650,14 +679,15 @@ with tab_upload:
     )
 
     if uploaded_file:
-        st.markdown("<span class='pill'>📁 File ready</span>", unsafe_allow_html=True)
-        st.audio(uploaded_file)
+        with st.container(key="upload_ready_block"):
+            st.markdown("<span class='pill pill-pop'>📁 File ready</span>", unsafe_allow_html=True)
+            st.audio(uploaded_file)
 
-        size_mb = uploaded_file.size / (1024 * 1024)
-        st.caption(f"**{uploaded_file.name}** · {size_mb:.2f} MB")
+            size_mb = uploaded_file.size / (1024 * 1024)
+            st.caption(f"**{uploaded_file.name}** · {size_mb:.2f} MB")
 
-        if size_mb > 200:
-            st.warning("⚠️ File is quite large — transcription may take a while.")
+            if size_mb > 200:
+                st.warning("⚠️ File is quite large — transcription may take a while.")
 
         if st.button("📨 Transcribe File", key="btn_upload_send"):
             suffix = os.path.splitext(uploaded_file.name)[1] or ".wav"
