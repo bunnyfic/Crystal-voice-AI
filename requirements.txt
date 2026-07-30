@@ -1,0 +1,6 @@
+streamlit>=1.33.0
+streamlit-mic-recorder>=0.0.8
+openai-whisper>=20231117
+torch>=2.1.0
+numpy<2.0
+ffmpeg-python>=0.2.0
