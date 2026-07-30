@@ -1,4 +1,3 @@
-# Crystal-voice-AI
 # 💎 Crystal Voice AI
 
 An AI-powered speech-to-text app — record from your mic or upload an audio
