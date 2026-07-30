@@ -114,11 +114,12 @@ html, body, [class*="css"]{{
 #MainMenu{{visibility:hidden;}}
 footer{{visibility:hidden;}}
 header{{background:transparent !important; box-shadow:none !important;}}
-[data-testid="stToolbar"]{{visibility:hidden; height:0;}}
+/* only hide the deploy button / running-status widget — leave the rest of the
+   toolbar alone, since the sidebar open/close arrow lives in there too */
+[data-testid="stAppDeployButton"]{{display:none !important;}}
+[data-testid="stStatusWidget"]{{display:none !important;}}
 [data-testid="collapsedControl"], [data-testid="stSidebarCollapseButton"]{{
     color:var(--ink) !important;
-    visibility:visible !important;
-    opacity:1 !important;
 }}
 
 /* ---------- Global text readability — everything blue/ink, never white ---------- */
