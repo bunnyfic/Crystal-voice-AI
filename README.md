@@ -2,6 +2,7 @@
 
 An AI-powered speech-to-text app — record from your mic or upload an audio
 file, and get an instant transcript.
+live server : https://crystal-voice-ai-dzskgsrfedkx9tx5yeemfr.streamlit.app/
 
 ## Setup
 
