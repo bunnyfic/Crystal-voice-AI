@@ -37,3 +37,7 @@ live server : https://crystal-voice-ai-dzskgsrfedkx9tx5yeemfr.streamlit.app/
 - Mic recording requires the browser to have microphone permission enabled
   for the page.
 - Supported upload formats: MP3, WAV, M4A, OGG, FLAC, WEBM.
+
+  SCREENSHOTS
+  <img width="1366" height="610" alt="image" src="https://github.com/user-attachments/assets/464b9028-5c3a-472d-ad9e-7be0af9598c8" />
+
